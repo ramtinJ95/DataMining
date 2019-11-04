@@ -123,34 +123,8 @@ def LSH(signature_matrix):
                         print("the following documents are quite similiar")
                         print(d1, d2)
                         print(sim)
-            
-        '''
-        for x in range(0, len(bucket)):
-            for y in range(x+1, len(bucket)):
-                if bucket[x] == bucket[y]:
-                    d1 = list(hashed_value_doc_id[bucket[x]])[0]
-                    d2 = list(hashed_value_doc_id.get(bucket[x]))[1]
-                    sim = Compare_Signatures(d1, d2, signature_matrix)
-                    if sim > threshold:
-                        print("the following documents are quite similiar")
-                        print(d1, d2)
-                        print(sim )
-                    print(d1, d2)
-                    print(sim)
-
-                for bucket_nr in hashed_value_doc_id.keys():
-            for doc_ind_x in range(0, len(hashed_value_doc_id[bucket_nr])):
-                for doc_ind_y in range(doc_ind_x + 1, len(hashed_value_doc_id[bucket_nr])):
-                    d1 = list(hashed_value_doc_id[bucket_nr])[doc_ind_x]
-                    d2 = list(hashed_value_doc_id[bucket_nr])[doc_ind_y]
-                    sim = Compare_Signatures(d1, d2, signature_matrix)
-                    if sim > threshold:
-                        print("the following documents are quite similiar")
-                        print(d1, d2)
-                        print(sim)
-                    
-                    '''
-
+             
+                        
 def Valid_argument_check():
     if nr_bands * nr_rows == nr_hashes:
         return True
