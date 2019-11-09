@@ -1,37 +1,55 @@
+from collections import defaultdict
 import numpy as np
 
-def import_dataset():
-    dataset = []
+
+item_count = {}
+
+class CandidatePair:
+    def __init__(self, frequent_items):
+        self.frequent_items = frequent_items
+    
+    def __eq__(self, candidate_pair_obj):
+        is_equal = self.compare_lists(self.frequent_items, candidate_pair_obj.frequent_items)
+        return is_equal
+
+    def compare_lists(self, candidate_pair_list):
+        check_len = len(self.frequent_items)
+        temp_arr = self.frequent_items + candidate_pair_list
+        temp_len = list(set(temp_arr))
+        if check_len == temp_len:
+            return True
+        else:
+            return False
+
+def read_data():
+    nr_transactions = 0
     with open('dataset.txt') as inputfile:
         for line in inputfile:
-            dataset.append(line.strip().split(' '))
-        return dataset
+            nr_transactions += 1
+            temp_arr = [int(x) for x in line.strip().split(' ')]  # changes from str to in to save memory
+            for item in temp_arr:
+                if item not in item_count.keys():
+                    item_count[item] = 1
+                else:
+                    item_count[item] = item_count[item] + 1
+    return nr_transactions
 
-def get_unique_items(dataset):
-    dataset = np.hstack(np.array(dataset))
-    only_unique_items = np.unique(dataset)
-    return only_unique_items
 
-def build_occurrence_dict(uniqe_items, dataset):
-    item_nr_occurrences = {}
-    for item in uniqe_items:
-        nr_occurrences = 0
-        for basket in dataset:
-            if item in basket:
-                nr_occurrences += 1 
-        item_nr_occurrences[item] = nr_occurrences
-    return item_nr_occurrences
+def find_singletons(support_threshold):
+    singletons = {}
+    for item in item_count:
+        if item_count[item] > support_threshold:
+            singletons[item] = True
+    return singletons
+
 
 def main():
-    dataset = import_dataset()
-    unique_items = get_unique_items(dataset)
-    print()
-    print("number of baskets", len(dataset))
-    print()
-    print(unique_items)
-    print("number of unique items", len(unique_items))
-    item_nr_occurrences = build_occurrence_dict(unique_items,dataset)
-    print("dict length", len(item_nr_occurrences))
+    nr_transactions = read_data()
+    print(len(item_count.keys()))
+    s = nr_transactions / 100 # 1 % of baskets/number of transactions
+    singletons = find_singletons(s)
+    print(len(singletons))
+    print(singletons.get(25))
 
 
 main()
