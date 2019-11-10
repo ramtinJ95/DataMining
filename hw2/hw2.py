@@ -6,15 +6,22 @@ item_count = {}
 
 
 class CandidatePair:
+    id = 0
+
     def __init__(self, frequent_items):
         self.frequent_items = frequent_items
         self.nr_occurrences = 0
-        self.nr_items_matched_in_basket = 0
+        self.id = CandidatePair.id
+        CandidatePair.id += 1
+
 
     def __eq__(self, candidate_pair_obj):
         is_equal = self.compare_lists(
             self.frequent_items, candidate_pair_obj.frequent_items)
         return is_equal
+    
+    def __hash__(self):
+        return self.id
 
     def __str__(self):
         return self.frequent_items
@@ -33,20 +40,31 @@ class CandidatePair:
             return True
         else:
             return False
+    
+    def is_match(self, frequent_basket_items):
+        item_set_length = len(self.frequent_items)
+        nr_matching_items = 0
+        is_match = False
+        for item in frequent_basket_items:
+            if item in self.frequent_items:
+                nr_matching_items += 1
+        if nr_matching_items >= item_set_length:
+            return True
+        else:
+            return False 
 
-    def one_match_found(self):
-        self.nr_items_matched_in_basket += 1
-
-    def is_full_match(self):
-        if self.nr_items_matched_in_basket == len(self.frequent_items):
-            self.nr
+    def set_new_occurrence(self):
+        self.nr_occurrences += 1
+    
+    def get_nr_occurrence(self):
+        return self.nr_occurrences
 
 def read_data():
     nr_transactions = 0
     with open('dataset.txt') as inputfile:
         for line in inputfile:
             nr_transactions += 1
-            # changes from str to in to save memory
+            # changes from str to int to save memory
             temp_arr = [int(x) for x in line.strip().split(' ')]
             for item in temp_arr:
                 if item not in item_count.keys():
@@ -78,19 +96,24 @@ def generate_candidate_pairs(singletons, k_itemset_list=None):
 
 
 def ith_filter(candidate_pair_list, singletons, support_threshold):
-    k_itemset_count = []
+    found_candidate_pairs = {}
     k_pair = len(candidate_pair_list[0].frequent_items)
     with open('dataset.txt') as inputfile:
         for line in inputfile:
             basket = [int(x) for x in line.strip().split(' ')]
             matched_items_candidate_pair = defaultdict(list)
+            frequent_basket_items = []
             for item in basket:
-                if item in singletons:
-                    for candidate_pair in candidate_pair_list:
-                        if item in candidate_pair.frequent_items:
-                            matched_items_candidate_pair[item].append(candidate_pair)
-
-
+                if item in singletons: # if we sort this we can make this to a binarySearch
+                    frequent_basket_items.append(item)
+            for candidate_pair in candidate_pair_list:
+                if candidate_pair.is_match(frequent_basket_items):
+                    if candidate_pair not in found_candidate_pairs.keys():
+                        found_candidate_pairs[candidate_pair] = 1
+                    else:
+                        found_candidate_pairs[candidate_pair] = found_candidate_pairs[candidate_pair] + 1
+    return found_candidate_pairs
+            
 def main():
     nr_transactions = read_data()
     print(len(item_count.keys()))
