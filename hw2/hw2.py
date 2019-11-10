@@ -42,6 +42,7 @@ class CandidatePair:
             return False
     
     def is_match(self, frequent_basket_items):
+        
         item_set_length = len(self.frequent_items)
         nr_matching_items = 0
         is_match = False
@@ -74,10 +75,10 @@ def read_data():
     return nr_transactions
 
 
-def find_singletons(support_threshold):
+def find_singletons(support_threshold,k_itemset_count = item_count):
     singletons = {}
-    for item in item_count:
-        if item_count[item] > support_threshold:
+    for item in k_itemset_count:
+        if k_itemset_count[item] > support_threshold:
             singletons[item] = True
     return singletons
 
@@ -95,13 +96,15 @@ def generate_candidate_pairs(singletons, k_itemset_list=None):
         return 0
 
 
-def ith_filter(candidate_pair_list, singletons, support_threshold):
+def ith_filter(candidate_pair_list, singletons):
     found_candidate_pairs = {}
     k_pair = len(candidate_pair_list[0].frequent_items)
+    dataset = []
     with open('dataset.txt') as inputfile:
+        line_nr = 0
         for line in inputfile:
             basket = [int(x) for x in line.strip().split(' ')]
-            matched_items_candidate_pair = defaultdict(list)
+            dataset.append(basket)
             frequent_basket_items = []
             for item in basket:
                 if item in singletons: # if we sort this we can make this to a binarySearch
@@ -112,7 +115,11 @@ def ith_filter(candidate_pair_list, singletons, support_threshold):
                         found_candidate_pairs[candidate_pair] = 1
                     else:
                         found_candidate_pairs[candidate_pair] = found_candidate_pairs[candidate_pair] + 1
+        print(line_nr)
+        line_nr += 1
     return found_candidate_pairs
+
+
             
 def main():
     nr_transactions = read_data()
@@ -122,7 +129,8 @@ def main():
     print(len(singletons))
     print(singletons.get(25))
     dubletons = generate_candidate_pairs(singletons)
-    print(dubletons)
-
+    print(len(dubletons))
+    v = ith_filter(dubletons, singletons)
+    print(len(v))
 
 main()
