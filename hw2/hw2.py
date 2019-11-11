@@ -42,17 +42,16 @@ class CandidatePair:
             return False
     
     def is_match(self, frequent_basket_items):
-        
+
         item_set_length = len(self.frequent_items)
         nr_matching_items = 0
         is_match = False
         for item in frequent_basket_items:
+            if nr_matching_items == item_set_length:
+                return True
             if item in self.frequent_items:
                 nr_matching_items += 1
-        if nr_matching_items >= item_set_length:
-            return True
-        else:
-            return False 
+        return False 
 
     def set_new_occurrence(self):
         self.nr_occurrences += 1
@@ -66,8 +65,8 @@ def read_data():
         for line in inputfile:
             nr_transactions += 1
             # changes from str to int to save memory
-            temp_arr = [int(x) for x in line.strip().split(' ')]
-            for item in temp_arr:
+            basket = [int(x) for x in line.strip().split(' ')]
+            for item in basket:
                 if item not in item_count.keys():
                     item_count[item] = 1
                 else:
@@ -100,23 +99,29 @@ def ith_filter(candidate_pair_list, singletons):
     found_candidate_pairs = {}
     k_pair = len(candidate_pair_list[0].frequent_items)
     dataset = []
+    nr_matches = 0
     with open('dataset.txt') as inputfile:
         line_nr = 0
         for line in inputfile:
             basket = [int(x) for x in line.strip().split(' ')]
             dataset.append(basket)
+        for basket in dataset:
             frequent_basket_items = []
             for item in basket:
-                if item in singletons: # if we sort this we can make this to a binarySearch
+                if item in singletons:
                     frequent_basket_items.append(item)
+            i = 0
             for candidate_pair in candidate_pair_list:
+                print(i)
+                i += 1
                 if candidate_pair.is_match(frequent_basket_items):
                     if candidate_pair not in found_candidate_pairs.keys():
+                        print("here")
                         found_candidate_pairs[candidate_pair] = 1
                     else:
-                        found_candidate_pairs[candidate_pair] = found_candidate_pairs[candidate_pair] + 1
-        print(line_nr)
-        line_nr += 1
+                        print("not here")
+                        found_candidate_pairs[candidate_pair] += 1
+            
     return found_candidate_pairs
 
 
@@ -130,7 +135,7 @@ def main():
     print(singletons.get(25))
     dubletons = generate_candidate_pairs(singletons)
     print(len(dubletons))
-    v = ith_filter(dubletons, singletons)
-    print(len(v))
+    #v = ith_filter(dubletons, singletons)
+    #print(len(v))
 
 main()
