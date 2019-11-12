@@ -4,7 +4,7 @@ import numpy as np
 import time
 Lk_arr = []
 s_threshold = 1000
-c_threshold = 0.5
+c_threshold = 0.1
 data_file_path = "./dataset.txt"
 
 
@@ -99,13 +99,29 @@ def Generate_Rules():
     for k in range(1, len(Lk_arr)):
         for itemset in Lk_arr[k]:
             all_subsets = Get_All_Subsets_Of_Itemset(itemset)
+            print("all supsets", all_subsets)
             for subset in all_subsets:
                 if Get_Confidence(subset, itemset) >= c_threshold:
-                    rule = []
-                    rule.append(subset)
-                    to = [x for x in itemset if x not in subset]
-                    rule.append(to)
-                    rules.append(rule)
+                    if type(subset) == int:
+                        set1 = subset
+                        set2 = []
+                        print("set1", set1)
+                        for x in list(itemset):
+                            if x != subset:
+                                set2.append(x)
+                        print("set2", set2)
+                        rule = [set1, set2]
+                        rules.append(rule)
+                    else:
+                        temp1 = list(subset)
+                        temp2 = list(itemset)
+                        set1 = list(subset)
+                        set2 = []
+                        for x in temp2:
+                            if x not in temp1:
+                                set2.append(x)
+                        rule = [set1,set2]
+                        rules.append(rule)
     return rules
 
 
@@ -115,8 +131,10 @@ def Get_All_Subsets_Of_Itemset(itemset):
     for k in range(1, k_max):
         k_subset = list((combinations(itemset, k)))
         all_subsets.append(k_subset)
+    print("before flatten", all_subsets)
     all_subsets = list(np.array(all_subsets).flatten())
-    all_subsets = list(map(int, all_subsets))
+    print("after flatten", all_subsets)
+    all_subsets = [int(x) for x in all_subsets if type(x) != tuple]
     return all_subsets
 
 
@@ -156,44 +174,3 @@ def Main():
 
 
 Main()
-'''
-
-
-def Count_Occurences_Of_Itemsets(Ck):
-    data_file = open(data_file_path)
-    basket_nr = 1
-    for line in data_file:
-        start_time = time.time()
-        basket_nr = basket_nr + 1
-        basket_items = list(map(int, line.split()))
-        basket_items.sort()
-        for itemset in Ck.keys():
-            itemset_in_basket = True
-            for item in itemset:
-                if item not in basket_items:
-                    itemset_in_basket = False
-                    break
-            if itemset_in_basket == True:
-                Ck[itemset] = Ck[itemset] + 1
-        print(“Basket_nr”, basket_nr)
-    data_file.close()
-    return Ck
-    def Generate_CkPlus1(L0, Lk):
-    Ckp1 = defaultdict()
-    Ckp1Temp = defaultdict()
-    for itemset in Lk.keys():
-        for item in L0.keys():
-            if type(itemset) is int:
-                Ckp1Temp[itemset, item] = 0
-            else:
-                Ckp1Temp[itemset + (item, )] = 0
-    for itemset in Ckp1Temp.keys():
-        items_in_order = True
-        for item_index in range(len(itemset) - 1):
-            if itemset[item_index] >= itemset[item_index + 1]:
-                items_in_order = False
-                break
-        if items_in_order == True:
-            Ckp1[itemset] = Ckp1Temp[itemset]
-    return Ckp1
-'''
