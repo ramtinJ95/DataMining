@@ -1,8 +1,10 @@
 from collections import defaultdict
+from itertools import combinations
 import numpy as np
 import time
 Lk_arr = []
 s_threshold = 1000
+c_threshold = 0.5
 data_file_path = "./dataset.txt"
 
 
@@ -24,7 +26,8 @@ def Count_Occurences_Of_Itemsets(Ck, k):
     data_file = open(data_file_path)
     for line in data_file:
         basket_itemsets = set(map(int, line.split()))
-        basket_items = dict.fromkeys(basket_itemsets.intersection(Lk_arr[0]), 0)
+        basket_items = dict.fromkeys(
+            basket_itemsets.intersection(Lk_arr[0]), 0)
         for a in range(k):
             basket_itemsets = basket_itemsets.intersection(Lk_arr[a])
             basket_itemsets = dict.fromkeys(basket_itemsets, 0)
@@ -90,14 +93,55 @@ def Create_Frequent_Itemsets(C0):
         k = k + 1
     return 0
 
-def Support_Of_Iemset():
-    return 0
 
-def Confidence_Of_Itemset():
-    return 0
-    
-def Interest_Of_Itemset():
-    return 0
+def Generate_Rules():
+    rules = []
+    for k in range(1, len(Lk_arr)):
+        for itemset in Lk_arr[k]:
+            all_subsets = Get_All_Subsets_Of_Itemset(itemset)
+            for subset in all_subsets:
+                if Get_Confidence(subset, itemset) >= c_threshold:
+                    rule = []
+                    rule.append(subset)
+                    to = [x for x in itemset if x not in subset]
+                    rule.append(to)
+                    rules.append(rule)
+    return rules
+
+
+def Get_All_Subsets_Of_Itemset(itemset):
+    k_max = len(itemset)
+    all_subsets = []
+    for k in range(1, k_max):
+        k_subset = list((combinations(itemset, k)))
+        all_subsets.append(k_subset)
+    all_subsets = list(np.array(all_subsets).flatten())
+    all_subsets = list(map(int, all_subsets))
+    return all_subsets
+
+
+def Get_Confidence(fromA, fromA_U_toB):
+    if type(fromA) is int and type(fromA_U_toB) is int:
+        sup_fromA_U_toB = Lk_arr[0][fromA_U_toB]
+        sup_fromA = Lk_arr[0][fromA]
+        return float(sup_fromA_U_toB) / float(sup_fromA)
+    elif type(fromA) is int:
+        k = len(fromA_U_toB)
+        sup_fromA_U_toB = Lk_arr[k - 1][fromA_U_toB]
+        sup_fromA = Lk_arr[0][fromA]
+        return float(sup_fromA_U_toB) / float(sup_fromA)
+    elif type(fromA_U_toB) is int:
+        k = len(fromA)
+        sup_fromA_U_toB = Lk_arr[0][fromA_U_toB]
+        sup_fromA = Lk_arr[k - 1][fromA]
+        return float(sup_fromA_U_toB) / float(sup_fromA)
+    else:
+        k1 = len(fromA_U_toB)
+        k2 = len(fromA)
+        sup_fromA_U_toB = Lk_arr[k1 - 1][fromA_U_toB]
+        sup_fromA = Lk_arr[k2 - 1][fromA]
+        return float(sup_fromA_U_toB) / float(sup_fromA)
+
 
 def Print_Empty_Lines(n_lines):
     for a in range(n_lines):
@@ -107,10 +151,12 @@ def Print_Empty_Lines(n_lines):
 def Main():
     C0 = Read_Data_C0()
     Create_Frequent_Itemsets(C0)
+    Print_Empty_Lines(3)
+    print(Generate_Rules())
 
 
 Main()
-"""
+'''
 
 
 def Count_Occurences_Of_Itemsets(Ck):
@@ -150,4 +196,4 @@ def Count_Occurences_Of_Itemsets(Ck):
         if items_in_order == True:
             Ckp1[itemset] = Ckp1Temp[itemset]
     return Ckp1
-    """
+'''
