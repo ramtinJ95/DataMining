@@ -4,7 +4,7 @@ import numpy as np
 import time
 Lk_arr = []
 s_threshold = 1000
-c_threshold = 0.1
+c_threshold = 0.01
 data_file_path = "./dataset.txt"
 
 
@@ -98,29 +98,41 @@ def Generate_Rules():
     rules = []
     for k in range(1, len(Lk_arr)):
         for itemset in Lk_arr[k]:
+            print("k", k)
+            print("Lk_arr", Lk_arr[k].keys())
+            Print_Empty_Lines(3)
             all_subsets = Get_All_Subsets_Of_Itemset(itemset)
             print("all supsets", all_subsets)
             for subset in all_subsets:
+                if type(subset) != int and len(subset) >= 2:
+                    print("subset", subset)
+                    print("itemset", itemset)
+                    print("confidence", Get_Confidence(subset, itemset))
+                    Print_Empty_Lines(3)
                 if Get_Confidence(subset, itemset) >= c_threshold:
                     if type(subset) == int:
-                        set1 = subset
+                        set1 = [subset]
                         set2 = []
                         print("set1", set1)
                         for x in list(itemset):
                             if x != subset:
                                 set2.append(x)
                         print("set2", set2)
+                        Print_Empty_Lines(3)
                         rule = [set1, set2]
                         rules.append(rule)
                     else:
                         temp1 = list(subset)
                         temp2 = list(itemset)
                         set1 = list(subset)
+                        # print(“set1eBefore: “, set1)
                         set2 = []
                         for x in temp2:
                             if x not in temp1:
                                 set2.append(x)
-                        rule = [set1,set2]
+                        # print(“set1e: “, set1)
+                        # print(“set2e: “, set2)
+                        rule = [set1, set2]
                         rules.append(rule)
     return rules
 
@@ -130,12 +142,24 @@ def Get_All_Subsets_Of_Itemset(itemset):
     all_subsets = []
     for k in range(1, k_max):
         k_subset = list((combinations(itemset, k)))
+        if k_max == 3:
+            print("k", k)
+            print("k_subset", k_subset)
         all_subsets.append(k_subset)
-    print("before flatten", all_subsets)
+    print("all_subset", all_subsets)
+    # print(“before flatten”, all_subsets)
     all_subsets = list(np.array(all_subsets).flatten())
-    print("after flatten", all_subsets)
-    all_subsets = [int(x) for x in all_subsets if type(x) != tuple]
-    return all_subsets
+    # print(“after flatten”, all_subsets)
+    all_subsets_final = []
+    for subset in all_subsets:
+        if type(subset) != tuple:
+            all_subsets_final.append(int(subset))
+        elif type(subset) == tuple and len(subset) == 1:
+            all_subsets_final.append(int(subset[0]))
+        else:
+            all_subsets_final.append(subset)
+    print("all_subset", all_subsets_final)
+    return all_subsets_final
 
 
 def Get_Confidence(fromA, fromA_U_toB):
