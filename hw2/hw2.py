@@ -4,7 +4,7 @@ import numpy as np
 import time
 Lk_arr = []
 s_threshold = 1000
-c_threshold = 0.01
+c_threshold = 0.5
 data_file_path = "./dataset.txt"
 
 
@@ -72,23 +72,15 @@ def Create_Frequent_Itemsets(C0):
     k = 1
     L0 = Filter_By_S_Threshold(C0)
     Lk_arr.append(L0)
-    start_time = 0
-    print(L0)
     Print_Empty_Lines(3)
     while True:
-        star_time = time.time()
         Ckp1 = Generate_CkPlus1(Lk_arr[0], Lk_arr[k - 1])
-        print("Generate_CkPlus1", time.time() - start_time)
-        start_time = time.time()
         Ckp1 = Count_Occurences_Of_Itemsets(Ckp1, k)
-        print("Count_Occurences_Of_Itemsets", time.time() - start_time)
-        start_time = time.time()
         Lkp1 = Filter_By_S_Threshold(Ckp1)
-        print("Filter_By_S_Threshold", time.time() - start_time)
         if len(Lkp1) <= 0:
             break
         Lk_arr.append(Lkp1)
-        print(Lkp1)
+        Print_Keys_And_Counts(Lkp1)
         Print_Empty_Lines(3)
         k = k + 1
     return 0
@@ -98,40 +90,25 @@ def Generate_Rules():
     rules = []
     for k in range(1, len(Lk_arr)):
         for itemset in Lk_arr[k]:
-            print("k", k)
-            print("Lk_arr", Lk_arr[k].keys())
-            Print_Empty_Lines(3)
             all_subsets = Get_All_Subsets_Of_Itemset(itemset)
-            print("all supsets", all_subsets)
             for subset in all_subsets:
-                if type(subset) != int and len(subset) >= 2:
-                    print("subset", subset)
-                    print("itemset", itemset)
-                    print("confidence", Get_Confidence(subset, itemset))
-                    Print_Empty_Lines(3)
                 if Get_Confidence(subset, itemset) >= c_threshold:
                     if type(subset) == int:
                         set1 = [subset]
                         set2 = []
-                        print("set1", set1)
                         for x in list(itemset):
                             if x != subset:
                                 set2.append(x)
-                        print("set2", set2)
-                        Print_Empty_Lines(3)
                         rule = [set1, set2]
                         rules.append(rule)
                     else:
                         temp1 = list(subset)
                         temp2 = list(itemset)
                         set1 = list(subset)
-                        # print(“set1eBefore: “, set1)
                         set2 = []
                         for x in temp2:
                             if x not in temp1:
                                 set2.append(x)
-                        # print(“set1e: “, set1)
-                        # print(“set2e: “, set2)
                         rule = [set1, set2]
                         rules.append(rule)
     return rules
@@ -142,14 +119,8 @@ def Get_All_Subsets_Of_Itemset(itemset):
     all_subsets = []
     for k in range(1, k_max):
         k_subset = list((combinations(itemset, k)))
-        if k_max == 3:
-            print("k", k)
-            print("k_subset", k_subset)
         all_subsets.append(k_subset)
-    print("all_subset", all_subsets)
-    # print(“before flatten”, all_subsets)
     all_subsets = list(np.array(all_subsets).flatten())
-    # print(“after flatten”, all_subsets)
     all_subsets_final = []
     for subset in all_subsets:
         if type(subset) != tuple:
@@ -158,7 +129,6 @@ def Get_All_Subsets_Of_Itemset(itemset):
             all_subsets_final.append(int(subset[0]))
         else:
             all_subsets_final.append(subset)
-    print("all_subset", all_subsets_final)
     return all_subsets_final
 
 
@@ -190,11 +160,27 @@ def Print_Empty_Lines(n_lines):
         print("")
 
 
+def Print_Rules(rules):
+    for rule in rules:
+        print(rule[0], end= " ")
+        print("- ->", end= " ")
+        print(rule[1])
+
+
+def Print_Keys_And_Counts(Lk):
+    for itemset in Lk.keys():
+        print("Itemset: ", itemset, end= "\t")
+        print("Occurences in Baskets: ", Lk[itemset])
+
+
 def Main():
+    print("s_threshold", s_threshold)
+    print("c_threshold", c_threshold)
     C0 = Read_Data_C0()
     Create_Frequent_Itemsets(C0)
     Print_Empty_Lines(3)
-    print(Generate_Rules())
+    rules = Generate_Rules()
+    Print_Rules(rules)
 
 
 Main()
