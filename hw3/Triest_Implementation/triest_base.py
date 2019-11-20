@@ -14,7 +14,7 @@ class TriestBase:
     def sample_edge(self, u, v):
         if self.time <= self.M:
             return True
-        elif self.flip_coin():
+        elif random.random() <= (self.M / self.time):
             u_dash, v_dash = self.sample.remove_random_edge()
             self.update_counters(u_dash, v_dash, '-')
             return True
