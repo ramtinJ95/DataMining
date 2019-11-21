@@ -56,7 +56,7 @@ class TriestImpr:
             return False
 
     def return_counters(self):
-        return {'global': self.globalTau, 'local': self.localTau}
+        return {'global': self.globalTau}
 
     def run(self, u, v):
         self.time += 1

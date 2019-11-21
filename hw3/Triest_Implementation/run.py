@@ -3,7 +3,7 @@ from triest_impr import TriestImpr
 
 mode = 2
 file_path = "./data/facebookDataset.txt"
-M_vals= [817000]
+M_vals= [10000]
 
 for M in M_vals:
     if mode == 1:

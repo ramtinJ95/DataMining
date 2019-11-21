@@ -75,7 +75,7 @@ class TriestBase:
         for key in self.localTau:
             self.localTau[key] = int(self.localTau[key] * eps)
 
-        return {'global': global_estimate, 'local': self.localTau}
+        return {'global': global_estimate}
 
     def run(self, u, v):
         self.time += 1
